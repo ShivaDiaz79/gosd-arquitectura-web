@@ -21,6 +21,7 @@
     "@tailwindcss/postcss": "^4.0.9",
     "apexcharts": "^4.3.0",
     "autoprefixer": "^10.4.20",
+    "firebase": "^12.2.1",
     "flatpickr": "^4.6.13",
     "framer-motion": "^12.23.12",
     "next": "15.2.3",
