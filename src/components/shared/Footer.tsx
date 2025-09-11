@@ -8,10 +8,10 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Producto</h3>
             <ul className="mt-3 space-y-2 text-sm">
-              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="/dashboard">Panel</Link></li>
-              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="/dashboard/calendar">Calendario</Link></li>
-              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="/dashboard/profile">Perfil</Link></li>
-              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="/dashboard/alerts">UI</Link></li>
+              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="#">Panel</Link></li>
+              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="#">Calendario</Link></li>
+              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="#">Perfil</Link></li>
+              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="#">UI</Link></li>
             </ul>
           </div>
 
@@ -28,10 +28,10 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Desarrolladores</h3>
             <ul className="mt-3 space-y-2 text-sm">
-              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="/dashboard/form-elements">Formularios</Link></li>
-              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="/dashboard/basic-tables">Tablas</Link></li>
-              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="/dashboard/line-chart">Gráficos</Link></li>
-              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="/dashboard/blank">Plantillas</Link></li>
+              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="#">Formularios</Link></li>
+              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="#">Tablas</Link></li>
+              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="#">Gráficos</Link></li>
+              <li><Link className="text-gray-600 dark:text-gray-300 hover:underline" href="#">Plantillas</Link></li>
             </ul>
           </div>
 
