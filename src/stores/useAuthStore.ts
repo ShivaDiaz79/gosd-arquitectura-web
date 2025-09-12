@@ -80,7 +80,7 @@ export const useAuthStore = create<AuthState>()(
 						set({ profile: { role: "user" } });
 					}
 				} catch {
-					/* noop */
+					set({ profile: { role: "user" } });
 				}
 			},
 
