@@ -7,13 +7,12 @@ interface ModalProps {
 	onClose: () => void;
 	className?: string;
 	children: React.ReactNode;
-	showCloseButton?: boolean; // muestra/oculta el botón "X"
-	isFullscreen?: boolean; // ocupa toda la pantalla
-	// 🔽 nuevas props
-	autoCloseMs?: number; // si se establece (>0), cierra solo tras N ms
-	disableManualClose?: boolean; // oculta boton, bloquea overlay/Escape
-	closeOnOverlay?: boolean; // default true
-	closeOnEsc?: boolean; // default true
+	showCloseButton?: boolean;
+	isFullscreen?: boolean;
+	autoCloseMs?: number;
+	disableManualClose?: boolean;
+	closeOnOverlay?: boolean;
+	closeOnEsc?: boolean;
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -33,7 +32,6 @@ export const Modal: React.FC<ModalProps> = ({
 	const canManualClose = !disableManualClose;
 	const showX = showCloseButton && canManualClose;
 
-	// ESC para cerrar (si está permitido)
 	useEffect(() => {
 		const handleEscape = (event: KeyboardEvent) => {
 			if (event.key === "Escape" && canManualClose && closeOnEsc) {
@@ -44,7 +42,6 @@ export const Modal: React.FC<ModalProps> = ({
 		return () => document.removeEventListener("keydown", handleEscape);
 	}, [isOpen, onClose, canManualClose, closeOnEsc]);
 
-	// Bloqueo de scroll
 	useEffect(() => {
 		if (isOpen) {
 			document.body.style.overflow = "hidden";
@@ -56,7 +53,6 @@ export const Modal: React.FC<ModalProps> = ({
 		};
 	}, [isOpen]);
 
-	// Autocierre
 	useEffect(() => {
 		if (!isOpen || !autoCloseMs || autoCloseMs <= 0) return;
 		const t = window.setTimeout(() => onClose(), autoCloseMs);
@@ -67,7 +63,6 @@ export const Modal: React.FC<ModalProps> = ({
 		? "w-full h-full"
 		: "relative w-full rounded-3xl bg-white dark:bg-gray-900";
 
-	// Variants de animación
 	const overlayVariants = {
 		hidden: { opacity: 0 },
 		visible: { opacity: 1 },
@@ -87,7 +82,6 @@ export const Modal: React.FC<ModalProps> = ({
 					role="dialog"
 					aria-modal="true"
 				>
-					{/* Overlay */}
 					{!isFullscreen && (
 						<motion.div
 							className="fixed inset-0 h-full w-full bg-gray-400/50 backdrop-blur-[32px]"
@@ -102,7 +96,6 @@ export const Modal: React.FC<ModalProps> = ({
 						/>
 					)}
 
-					{/* Panel */}
 					<motion.div
 						ref={modalRef}
 						className={`${contentClasses} ${className || ""}`}

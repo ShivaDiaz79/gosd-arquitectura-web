@@ -1,25 +1,26 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import esLocale from "@fullcalendar/core/locales/es";
 import {
-	EventInput,
 	DateSelectArg,
 	EventClickArg,
 	EventContentArg,
+	EventInput,
 } from "@fullcalendar/core";
+
 import { useModal } from "@/hooks/useModal";
 import { Modal } from "@/components/ui/modal";
-
-interface CalendarEvent extends EventInput {
-	extendedProps: {
-		calendar: string;
-	};
-}
+import { ConfirmDeleteModal } from "@/components/shared/ConfirmDeleteModal";
+import {
+	CalendarService,
+	type CalendarEvent,
+	type CalendarCategory,
+} from "@/services/CalendarService";
 
 const Calendar: React.FC = () => {
 	const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
@@ -28,8 +29,11 @@ const Calendar: React.FC = () => {
 	const [eventTitle, setEventTitle] = useState("");
 	const [eventStartDate, setEventStartDate] = useState("");
 	const [eventEndDate, setEventEndDate] = useState("");
-	const [eventLevel, setEventLevel] = useState("primary");
+	const [eventLevel, setEventLevel] = useState<CalendarCategory>("primary");
 	const [events, setEvents] = useState<CalendarEvent[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [confirmOpen, setConfirmOpen] = useState(false);
+
 	const calendarRef = useRef<FullCalendar>(null);
 	const { isOpen, openModal, closeModal } = useModal();
 
@@ -39,32 +43,24 @@ const Calendar: React.FC = () => {
 		primary: { label: "Principal", className: "primary" },
 		warning: { label: "Advertencia", className: "warning" },
 	} as const;
-
 	type CategoryKey = keyof typeof calendarCategories;
 
+	// Suscripción a Firestore (tiempo real)
 	useEffect(() => {
-		setEvents([
-			{
-				id: "1",
-				title: "Conferencia",
-				start: new Date().toISOString().split("T")[0],
-				extendedProps: { calendar: "danger" },
-			},
-			{
-				id: "2",
-				title: "Reunión",
-				start: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-				extendedProps: { calendar: "success" },
-			},
-			{
-				id: "3",
-				title: "Taller",
-				start: new Date(Date.now() + 172800000).toISOString().split("T")[0],
-				end: new Date(Date.now() + 259200000).toISOString().split("T")[0],
-				extendedProps: { calendar: "primary" },
-			},
-		]);
+		const unsub = CalendarService.subscribe((liveEvents) => {
+			setEvents(liveEvents);
+			setLoading(false);
+		});
+		return () => unsub();
 	}, []);
+
+	const resetModalFields = () => {
+		setEventTitle("");
+		setEventStartDate("");
+		setEventEndDate("");
+		setEventLevel("primary");
+		setSelectedEvent(null);
+	};
 
 	const handleDateSelect = (selectInfo: DateSelectArg) => {
 		resetModalFields();
@@ -74,16 +70,26 @@ const Calendar: React.FC = () => {
 	};
 
 	const handleEventClick = (clickInfo: EventClickArg) => {
-		const event = clickInfo.event;
-		setSelectedEvent(event as unknown as CalendarEvent);
-		setEventTitle(event.title);
-		setEventStartDate(event.start?.toISOString().split("T")[0] || "");
-		setEventEndDate(event.end?.toISOString().split("T")[0] || "");
-		setEventLevel((event.extendedProps.calendar as string) || "primary");
+		const ev = clickInfo.event;
+		const mapped: CalendarEvent = {
+			id: ev.id,
+			title: ev.title,
+			start: ev.startStr || ev.start?.toISOString().split("T")[0] || "",
+			end: ev.endStr || ev.end?.toISOString().split("T")[0] || undefined,
+			allDay: ev.allDay,
+			extendedProps: {
+				calendar: ev.extendedProps.calendar as string as CalendarCategory,
+			},
+		};
+		setSelectedEvent(mapped);
+		setEventTitle(mapped.title);
+		setEventStartDate(mapped.start);
+		setEventEndDate(mapped.end || "");
+		setEventLevel(mapped.extendedProps.calendar || "primary");
 		openModal();
 	};
 
-	const handleAddOrUpdateEvent = () => {
+	const handleAddOrUpdateEvent = async () => {
 		if (!eventTitle.trim()) {
 			alert("Por favor, ingresa un título.");
 			return;
@@ -92,42 +98,41 @@ const Calendar: React.FC = () => {
 			alert("Por favor, elige una fecha de inicio.");
 			return;
 		}
-
-		if (selectedEvent) {
-			setEvents((prevEvents) =>
-				prevEvents.map((event) =>
-					event.id === selectedEvent.id
-						? {
-								...event,
-								title: eventTitle,
-								start: eventStartDate,
-								end: eventEndDate || undefined,
-								extendedProps: { calendar: eventLevel },
-						  }
-						: event
-				)
-			);
-		} else {
-			const newEvent: CalendarEvent = {
-				id: Date.now().toString(),
-				title: eventTitle,
-				start: eventStartDate,
-				end: eventEndDate || undefined,
-				allDay: true,
-				extendedProps: { calendar: eventLevel },
-			};
-			setEvents((prevEvents) => [...prevEvents, newEvent]);
+		try {
+			if (selectedEvent) {
+				await CalendarService.update(selectedEvent.id, {
+					title: eventTitle.trim(),
+					start: eventStartDate,
+					end: eventEndDate || null,
+					allDay: true,
+					calendar: eventLevel,
+				});
+			} else {
+				await CalendarService.create({
+					title: eventTitle.trim(),
+					start: eventStartDate,
+					end: eventEndDate || null,
+					allDay: true,
+					calendar: eventLevel,
+				});
+			}
+			closeModal();
+			resetModalFields();
+			// onSnapshot actualizará la lista en tiempo real
+		} catch (e) {
+			console.error(e);
+			alert("Ocurrió un error al guardar el evento.");
 		}
-		closeModal();
-		resetModalFields();
 	};
 
-	const resetModalFields = () => {
-		setEventTitle("");
-		setEventStartDate("");
-		setEventEndDate("");
-		setEventLevel("primary");
-		setSelectedEvent(null);
+	const askDelete = () => setConfirmOpen(true);
+
+	const handleDeleteConfirmed = async () => {
+		if (!selectedEvent) return;
+		await CalendarService.delete(selectedEvent.id);
+		setConfirmOpen(false);
+		closeModal();
+		resetModalFields();
 	};
 
 	return (
@@ -144,7 +149,7 @@ const Calendar: React.FC = () => {
 						center: "title",
 						right: "dayGridMonth,timeGridWeek,timeGridDay",
 					}}
-					events={events}
+					events={events as EventInput[]}
 					selectable={true}
 					select={handleDateSelect}
 					eventClick={handleEventClick}
@@ -158,8 +163,14 @@ const Calendar: React.FC = () => {
 						},
 					}}
 				/>
+				{loading && (
+					<div className="p-4 text-sm text-gray-500 dark:text-gray-400">
+						Cargando eventos...
+					</div>
+				)}
 			</div>
 
+			{/* Modal de alta/edición */}
 			<Modal
 				isOpen={isOpen}
 				onClose={closeModal}
@@ -262,6 +273,15 @@ const Calendar: React.FC = () => {
 					</div>
 
 					<div className="modal-footer mt-6 flex items-center gap-3 sm:justify-end">
+						{selectedEvent && (
+							<button
+								onClick={askDelete}
+								type="button"
+								className="flex w-full justify-center rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:bg-gray-800 dark:text-red-400 sm:w-auto"
+							>
+								Eliminar
+							</button>
+						)}
 						<button
 							onClick={closeModal}
 							type="button"
@@ -279,6 +299,19 @@ const Calendar: React.FC = () => {
 					</div>
 				</div>
 			</Modal>
+
+			{/* Modal de confirmación de eliminación */}
+			<ConfirmDeleteModal
+				isOpen={confirmOpen}
+				onClose={() => setConfirmOpen(false)}
+				onConfirm={handleDeleteConfirmed}
+				title="Eliminar evento"
+				description={`¿Seguro que deseas eliminar “${
+					selectedEvent?.title ?? "este evento"
+				}”? Esta acción no se puede deshacer.`}
+				confirmLabel="Eliminar"
+				cancelLabel="Cancelar"
+			/>
 		</div>
 	);
 };
