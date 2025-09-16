@@ -1,15 +1,16 @@
 "use client";
 
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFormContext, get } from "react-hook-form";
 import Label from "@/components/form/Label";
 import Select from "@/components/form/Select";
+import { ChevronDownIcon } from "@/icons";
 
 export interface Option {
 	value: string;
 	label: string;
 }
 
-interface RHFSelectProps {
+interface RHFSelectProps extends React.HTMLAttributes<HTMLDivElement> {
 	name: string;
 	label?: string;
 	options: Option[];
@@ -25,26 +26,51 @@ const RHFSelect: React.FC<RHFSelectProps> = ({
 	placeholder,
 	className,
 	disabled,
+	...rest
 }) => {
-	const { control } = useFormContext();
+	const {
+		control,
+		formState: { errors },
+	} = useFormContext();
+
+	const err = get(errors, name) as { message?: string } | undefined;
+	const hintId = `${name}-hint`;
 
 	return (
-		<div className="space-y-1.5">
+		<div className="space-y-1.5" {...rest}>
 			{label && <Label htmlFor={name}>{label}</Label>}
+
 			<Controller
 				name={name}
 				control={control}
 				render={({ field }) => (
-					<Select
-						options={options}
-						placeholder={placeholder}
-						defaultValue={(field.value as string) ?? ""}
-						onChange={(val) => field.onChange(val)}
-						className={className}
-					/>
+					<div className="relative">
+						<Select
+							options={options}
+							placeholder={placeholder}
+							onChange={(val: any) =>
+								field.onChange(typeof val === "string" ? val : val?.value ?? "")
+							}
+							className={className}
+							aria-invalid={!!err || undefined}
+							aria-describedby={err ? hintId : undefined}
+						/>
+						<span className="absolute text-gray-500 -translate-y-1/2 pointer-events-none right-3 top-1/2 dark:text-gray-400">
+							<ChevronDownIcon />
+						</span>
+					</div>
 				)}
 			/>
-			{disabled && <p className="text-xs text-gray-500">Campo deshabilitado</p>}
+
+			{err?.message && (
+				<p id={hintId} className="text-xs text-red-600">
+					{err.message}
+				</p>
+			)}
+
+			{disabled && !err?.message && (
+				<p className="text-xs text-gray-500">Campo deshabilitado</p>
+			)}
 		</div>
 	);
 };

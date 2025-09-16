@@ -38,36 +38,40 @@ const navItems: NavItem[] = [
 		path: "/calendar",
 	},
 	{
-		icon: <UserCircleIcon />,
-		name: "Perfil de usuario",
-		path: "/profile",
-	},
-	{
 		name: "Usuarios",
 		icon: <UserCircleIcon />,
 		path: "/users",
 	},
-
 	{
-		name: "Formularios",
-		icon: <ListIcon />,
-		subItems: [
-			{ name: "Elementos de formulario", path: "/form-elements", pro: false },
-		],
+		icon: <PieChartIcon />,
+		name: "Configurar Cotizador",
+		path: "/cotizador",
 	},
-	{
-		name: "Tablas",
-		icon: <TableIcon />,
-		subItems: [{ name: "Tablas básicas", path: "/basic-tables", pro: false }],
-	},
-	{
-		name: "Páginas",
-		icon: <PageIcon />,
-		subItems: [
-			{ name: "Página en blanco", path: "/blank", pro: false },
-			{ name: "Error 404", path: "/error-404", pro: false },
-		],
-	},
+	// {
+	// 	icon: <UserCircleIcon />,
+	// 	name: "Perfil de usuario",
+	// 	path: "/profile",
+	// },
+	// {
+	// 	name: "Formularios",
+	// 	icon: <ListIcon />,
+	// 	subItems: [
+	// 		{ name: "Elementos de formulario", path: "/form-elements", pro: false },
+	// 	],
+	// },
+	// {
+	// 	name: "Tablas",
+	// 	icon: <TableIcon />,
+	// 	subItems: [{ name: "Tablas básicas", path: "/basic-tables", pro: false }],
+	// },
+	// {
+	// 	name: "Páginas",
+	// 	icon: <PageIcon />,
+	// 	subItems: [
+	// 		{ name: "Página en blanco", path: "/blank", pro: false },
+	// 		{ name: "Error 404", path: "/error-404", pro: false },
+	// 	],
+	// },
 ];
 
 const othersItems: NavItem[] = [
