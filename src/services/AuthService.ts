@@ -7,8 +7,17 @@ import {
 	createUserWithEmailAndPassword,
 	updateProfile,
 	getAuth,
+	GoogleAuthProvider,
+	FacebookAuthProvider,
+	signInWithPopup,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, getFirestore } from "firebase/firestore";
+import {
+	doc,
+	getDoc,
+	setDoc,
+	getFirestore,
+	serverTimestamp,
+} from "firebase/firestore";
 import { initializeApp, getApps } from "firebase/app";
 
 export interface UserSimple {
@@ -51,6 +60,28 @@ function getSecondary() {
 	};
 }
 
+async function ensureUserDoc(
+	u: FirebaseUser,
+	fallbackRole: RoleKey = "client"
+) {
+	const ref = doc(db, "users", u.uid);
+	const snap = await getDoc(ref);
+	if (!snap.exists()) {
+		const roleLabel =
+			ROLES.find((r) => r.key === fallbackRole)?.label ?? fallbackRole;
+		await setDoc(ref, {
+			email: u.email ?? null,
+			firstName: u.displayName?.split(" ")?.[0] ?? null,
+			lastName: u.displayName?.split(" ")?.slice(1)?.join(" ") || null,
+			role: fallbackRole,
+			roleLabel,
+			createdAt: serverTimestamp(),
+			photoURL: u.photoURL ?? null,
+			providerId: u.providerData?.[0]?.providerId ?? "password",
+		});
+	}
+}
+
 export const authService = {
 	toSimpleUser(user: FirebaseUser): UserSimple {
 		return {
@@ -67,6 +98,7 @@ export const authService = {
 
 	async signIn(email: string, password: string): Promise<FirebaseUser> {
 		const cred = await signInWithEmailAndPassword(auth, email, password);
+		await ensureUserDoc(cred.user);
 		return cred.user;
 	},
 
@@ -78,7 +110,7 @@ export const authService = {
 		const snap = await getDoc(doc(db, "users", uid));
 		if (snap.exists()) {
 			const data = snap.data() || {};
-			return { role: (data.rol as string) || data.role || "user", ...data };
+			return { role: (data.role as string) || data.role || "user", ...data };
 		}
 		return { role: "user" };
 	},
@@ -88,14 +120,12 @@ export const authService = {
 		password: string,
 		firstName: string,
 		lastName: string,
-		roleKey: RoleKey
+		roleKey: RoleKey = "client"
 	): Promise<UserSimple> {
 		const { auth: secAuth, db: secDb } = getSecondary();
 		const cred = await createUserWithEmailAndPassword(secAuth, email, password);
 
-		await updateProfile(cred.user, {
-			displayName: `${firstName} ${lastName}`,
-		});
+		await updateProfile(cred.user, { displayName: `${firstName} ${lastName}` });
 
 		const roleLabel = ROLES.find((r) => r.key === roleKey)?.label ?? roleKey;
 
@@ -106,6 +136,8 @@ export const authService = {
 			role: roleKey,
 			roleLabel,
 			createdAt: new Date(),
+			photoURL: cred.user.photoURL ?? null,
+			providerId: "password",
 		});
 
 		await fbSignOut(secAuth);
@@ -116,5 +148,35 @@ export const authService = {
 			displayName: cred.user.displayName,
 			photoURL: cred.user.photoURL,
 		};
+	},
+
+	async signUpSelf(
+		email: string,
+		password: string,
+		firstName: string,
+		lastName: string,
+		roleKey: RoleKey = "client"
+	): Promise<FirebaseUser> {
+		const cred = await createUserWithEmailAndPassword(auth, email, password);
+		await updateProfile(cred.user, { displayName: `${firstName} ${lastName}` });
+		await ensureUserDoc(cred.user, roleKey);
+		return cred.user;
+	},
+
+	async signInWithGoogle(roleKey: RoleKey = "client"): Promise<FirebaseUser> {
+		const provider = new GoogleAuthProvider();
+		provider.setCustomParameters({ prompt: "select_account" });
+		const cred = await signInWithPopup(auth, provider);
+		await ensureUserDoc(cred.user, roleKey);
+		return cred.user;
+	},
+
+	async signInWithFacebook(roleKey: RoleKey = "client"): Promise<FirebaseUser> {
+		const provider = new FacebookAuthProvider();
+		provider.addScope("email");
+		provider.setCustomParameters({ display: "popup" });
+		const cred = await signInWithPopup(auth, provider);
+		await ensureUserDoc(cred.user, roleKey);
+		return cred.user;
 	},
 };
