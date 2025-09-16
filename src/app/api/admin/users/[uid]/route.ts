@@ -14,14 +14,16 @@ async function ensureIsAdmin(req: NextRequest) {
 	return null;
 }
 
+type Params = { uid: string };
+
 export async function PATCH(
 	req: NextRequest,
-	{ params }: { params: { uid: string } }
+	{ params }: { params: Promise<Params> }
 ) {
 	const guard = await ensureIsAdmin(req);
 	if (guard) return guard;
 
-	const uid = params.uid;
+	const { uid } = await params;
 	const body = await req.json().catch(() => ({}));
 	const password = (body?.password as string | undefined)?.trim();
 
@@ -38,18 +40,18 @@ export async function PATCH(
 
 export async function DELETE(
 	req: NextRequest,
-	{ params }: { params: { uid: string } }
+	{ params }: { params: Promise<Params> }
 ) {
 	const guard = await ensureIsAdmin(req);
 	if (guard) return guard;
 
-	const uid = params.uid;
+	const { uid } = await params;
 
 	await adminDb()
 		.doc(`users/${uid}`)
 		.delete()
 		.catch(() => {});
-
 	await adminAuth().deleteUser(uid);
+
 	return new NextResponse(null, { status: 204 });
 }
