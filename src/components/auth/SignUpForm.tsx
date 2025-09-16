@@ -1,4 +1,5 @@
 "use client";
+
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
@@ -11,7 +12,9 @@ import { useAuthStore } from "@/stores/useAuthStore";
 export default function SignUpForm() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [isChecked, setIsChecked] = useState(false);
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState<
+		"none" | "email" | "google" | "facebook"
+	>("none");
 	const [error, setError] = useState<string | null>(null);
 
 	const setFromFirebase = useAuthStore((s) => s.setFromFirebase);
@@ -19,30 +22,71 @@ export default function SignUpForm() {
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		setError(null);
-		setLoading(true);
+		setLoading("email");
 
 		const formData = new FormData(e.currentTarget);
-		const fname = formData.get("fname") as string;
-		const lname = formData.get("lname") as string;
-		const email = formData.get("email") as string;
-		const password = formData.get("password") as string;
+		const fname = (formData.get("fname") as string) || "";
+		const lname = (formData.get("lname") as string) || "";
+		const email = (formData.get("email") as string) || "";
+		const password = (formData.get("password") as string) || "";
 
 		if (!isChecked) {
 			setError("Debes aceptar los términos y condiciones.");
-			setLoading(false);
+			setLoading("none");
 			return;
 		}
 
 		try {
-			const fbUser = await authService.signUp(email, password, fname, lname);
+			// Flujo normal: el usuario queda logueado
+			const fbUser = await authService.signUpSelf(
+				email,
+				password,
+				fname,
+				lname,
+				"client"
+			);
 			const simple = authService.toSimpleUser(fbUser);
 			await setFromFirebase(simple as any);
+			// TODO: redirige si quieres (router.push('/dashboard'))
 		} catch (err: any) {
-			setError(err.message || "Error al crear la cuenta");
+			setError(err?.message || "Error al crear la cuenta");
 		} finally {
-			setLoading(false);
+			setLoading("none");
 		}
 	}
+
+	async function handleGoogle() {
+		setError(null);
+		setLoading("google");
+		try {
+			const fbUser = await authService.signInWithGoogle("client");
+			const simple = authService.toSimpleUser(fbUser);
+			await setFromFirebase(simple as any);
+			// TODO: redirige
+		} catch (err: any) {
+			setError(err?.message || "No se pudo iniciar con Google");
+		} finally {
+			setLoading("none");
+		}
+	}
+
+	async function handleFacebook() {
+		setError(null);
+		setLoading("facebook");
+		try {
+			const fbUser = await authService.signInWithFacebook("client");
+			const simple = authService.toSimpleUser(fbUser);
+			await setFromFirebase(simple as any);
+			// TODO: redirige
+		} catch (err: any) {
+			// Si Facebook bloquea popups de 3ros, revisa configuración de OAuth
+			setError(err?.message || "No se pudo iniciar con Facebook");
+		} finally {
+			setLoading("none");
+		}
+	}
+
+	const isBusy = loading !== "none";
 
 	return (
 		<div className="flex flex-col flex-1 lg:w-1/2 w-full overflow-y-auto no-scrollbar">
@@ -55,6 +99,7 @@ export default function SignUpForm() {
 					Volver al inicio
 				</Link>
 			</div>
+
 			<div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
 				<div>
 					<div className="mb-5 sm:mb-8">
@@ -78,6 +123,7 @@ export default function SignUpForm() {
 										id="fname"
 										name="fname"
 										placeholder="Ingresa tu nombre"
+										required
 									/>
 								</div>
 								<div>
@@ -89,6 +135,7 @@ export default function SignUpForm() {
 										id="lname"
 										name="lname"
 										placeholder="Ingresa tu apellido"
+										required
 									/>
 								</div>
 							</div>
@@ -102,6 +149,7 @@ export default function SignUpForm() {
 									id="email"
 									name="email"
 									placeholder="Ingresa tu correo"
+									required
 								/>
 							</div>
 
@@ -115,10 +163,14 @@ export default function SignUpForm() {
 										type={showPassword ? "text" : "password"}
 										id="password"
 										name="password"
+										required
 									/>
 									<span
 										onClick={() => setShowPassword(!showPassword)}
 										className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+										aria-label={
+											showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+										}
 									>
 										{showPassword ? (
 											<EyeIcon className="fill-gray-500 dark:fill-gray-400" />
@@ -150,14 +202,42 @@ export default function SignUpForm() {
 
 							{error && <p className="text-sm text-red-500">{error}</p>}
 
-							<div>
+							<div className="space-y-3">
 								<button
 									type="submit"
-									disabled={loading}
+									disabled={isBusy}
 									className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50"
 								>
-									{loading ? "Creando..." : "Crear cuenta"}
+									{loading === "email" ? "Creando..." : "Crear cuenta"}
 								</button>
+
+								<div className="relative flex items-center justify-center">
+									<span className="h-px w-full bg-gray-200 dark:bg-gray-800" />
+									<span className="absolute bg-white dark:bg-gray-900 px-3 text-xs text-gray-500">
+										o continuar con
+									</span>
+								</div>
+
+								<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+									<button
+										type="button"
+										onClick={handleGoogle}
+										disabled={isBusy}
+										className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 disabled:opacity-50"
+									>
+										{loading === "google" ? "Abriendo Google..." : "Google"}
+									</button>
+									<button
+										type="button"
+										onClick={handleFacebook}
+										disabled={isBusy}
+										className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 disabled:opacity-50"
+									>
+										{loading === "facebook"
+											? "Abriendo Facebook..."
+											: "Facebook"}
+									</button>
+								</div>
 							</div>
 						</div>
 					</form>

@@ -1,9 +1,8 @@
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { attachAuthListenerOnce } from "@/stores/useAuthStore";
+import { useAuthStore, attachAuthListenerOnce } from "@/stores/useAuthStore";
 
 export default function AuthGuard({ children }: { children: ReactNode }) {
 	const router = useRouter();
@@ -16,44 +15,48 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
 		return () => unsub?.();
 	}, []);
 
-	useEffect(() => {
-		if (!hasHydrated) return;
+	const isAuthRoute = pathname === "/signin" || pathname === "/";
+
+	const isReady = hasHydrated && status !== "loading";
+
+	const redirectTo = useMemo(() => {
+		if (!isReady) return null;
 
 		if (status === "unauthenticated") {
-			router.replace("/signin");
-			return;
+			if (!isAuthRoute) {
+				const next = encodeURIComponent(pathname);
+				return `/signin?next=${next}`;
+			}
+			return null;
 		}
 
-		if (status === "authenticated" && profile) {
-			console.log("profile role:", profile);
-			const isClient = profile.role === "client";
-			const target = isClient ? "/cliente" : "/dashboard";
-
-			const onAuthRoutes = pathname === "/signin" || pathname === "/";
-			const alreadyInArea = pathname.startsWith(target);
-
-			if (onAuthRoutes && !alreadyInArea) {
-				router.replace(target);
-				return;
-			}
-
-			if (isClient && pathname.startsWith("/dashboard")) {
-				router.replace("/cliente");
-				return;
-			}
-
-			if (!isClient && pathname.startsWith("/cliente")) {
-				router.replace("/dashboard");
-				return;
-			}
+		if (status === "authenticated" && !profile) {
+			return null;
 		}
-	}, [status, hasHydrated, profile, pathname, router]);
 
-	if (
+		const isClient = profile?.role === "client";
+		const targetBase = isClient ? "/usuario" : "/dashboard";
+
+		if (isAuthRoute) return targetBase;
+		if (isClient && pathname.startsWith("/dashboard")) return "/usuario";
+		if (!isClient && pathname.startsWith("/usuario")) return "/dashboard";
+
+		return null;
+	}, [isReady, status, profile, isAuthRoute, pathname]);
+
+	useEffect(() => {
+		if (redirectTo) {
+			router.replace(redirectTo);
+		}
+	}, [redirectTo, router]);
+
+	const shouldShowLoader =
 		!hasHydrated ||
 		status === "loading" ||
-		(status === "authenticated" && !profile)
-	) {
+		(status === "authenticated" && !profile) ||
+		Boolean(redirectTo);
+
+	if (shouldShowLoader) {
 		return (
 			<div className="grid min-h-[60vh] place-items-center">
 				<div className="animate-spin size-8 rounded-full border-2 border-current border-t-transparent" />
