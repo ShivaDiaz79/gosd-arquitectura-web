@@ -1,15 +1,16 @@
 "use client";
 import Image from "next/image";
 import React, { useState } from "react";
-import { Dropdown } from "@/components/ui/dropdown/Dropdown";
-import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
+import { Dropdown } from "../ui/dropdown/Dropdown";
+import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useRouter } from "next/navigation";
 
 export default function UserDropdown() {
 	const [isOpen, setIsOpen] = useState(false);
-	const logout = useAuthStore((s) => s.logout);
+	const signOut = useAuthStore((s) => s.signOut);
 	const router = useRouter();
+	const profile = useAuthStore((s) => s.profile);
 	const user = useAuthStore((s) => s.user);
 
 	function toggleDropdown(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
@@ -31,13 +32,13 @@ export default function UserDropdown() {
 					<Image
 						width={44}
 						height={44}
-						src={"/images/user/owner.jpg"}
+						src={user?.photoURL || "/images/user/owner.jpg"}
 						alt="Usuario"
 					/>
 				</span>
 
 				<span className="block mr-1 font-medium text-theme-sm">
-					{user?.name} {user?.lastName}
+					{profile?.firstName} {profile?.lastName}
 				</span>
 
 				<svg
@@ -67,7 +68,7 @@ export default function UserDropdown() {
 			>
 				<div>
 					<span className="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">
-						{user?.name} {user?.lastName}
+						{profile?.firstName} {profile?.lastName}
 					</span>
 					<span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
 						{user?.email}
@@ -134,7 +135,7 @@ export default function UserDropdown() {
 				<button
 					className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
 					onClick={async () => {
-						await logout();
+						await signOut();
 						closeDropdown();
 						router.push("/signin");
 					}}
