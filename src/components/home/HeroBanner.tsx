@@ -6,11 +6,12 @@ import {
 	useScroll,
 	useTransform,
 } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
+import { useHeroContent } from "@/hooks/useHeroContent";
 
 const HeroBanner = () => {
+	const { data, loading } = useHeroContent();
 	const prefersReduced = useReducedMotion();
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -35,6 +36,11 @@ const HeroBanner = () => {
 		[0, prefersReduced ? 0 : -20]
 	);
 
+	const overlay =
+		data?.overlayMode === "light"
+			? `bg-white/${data.overlayOpacity || "40"}`
+			: `bg-black/${data?.overlayOpacity || "40"}`;
+
 	return (
 		<section
 			ref={ref}
@@ -42,14 +48,14 @@ const HeroBanner = () => {
 		>
 			<motion.div aria-hidden style={{ y: yBg }} className="absolute inset-0">
 				<img
-					src="https://content.arquitecturaydiseno.es/medio/2017/03/08/apartamentos12_c3121e4b.png"
+					src={data?.bgUrl}
 					alt=""
 					sizes="100vw"
-					className="object-cover"
+					className="h-full w-full object-cover"
 				/>
 			</motion.div>
 
-			<div className="absolute inset-0 bg-white/35 dark:bg-black/45 backdrop-blur-[1px]" />
+			<div className={`absolute inset-0 ${overlay} backdrop-blur-[1px]`} />
 
 			<div className="relative z-10 mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 h-full flex items-center">
 				<div>
@@ -60,7 +66,7 @@ const HeroBanner = () => {
 						transition={{ type: "spring", stiffness: 140, damping: 22 }}
 						className="text-4xl sm:text-5xl md:text-6xl tracking-tight font-semibold"
 					>
-						GOSD CONSTRUCTOR
+						{loading ? "Cargando…" : data?.title}
 					</motion.h1>
 
 					<motion.p
@@ -70,8 +76,7 @@ const HeroBanner = () => {
 						transition={{ delay: 0.1, duration: 0.7 }}
 						className="mt-4 max-w-2xl text-base sm:text-lg text-black/85 dark:text-white/85"
 					>
-						Diseño, permisos y ejecución llave en mano. Precisión BIM y control
-						de costos, plazos y calidad.
+						{loading ? " " : data?.subtitle}
 					</motion.p>
 
 					<motion.div
@@ -80,18 +85,22 @@ const HeroBanner = () => {
 						transition={{ delay: 0.2, duration: 0.6 }}
 						className="mt-8 flex gap-3"
 					>
-						<Link
-							href="/obras"
-							className="inline-flex items-center rounded-md px-5 py-2.5 text-sm bg-black text-white dark:bg-white/10 dark:text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/30"
-						>
-							Ver obras
-						</Link>
-						<Link
-							href="/contacto"
-							className="inline-flex items-center rounded-md px-5 py-2.5 text-sm border border-black/15 dark:border-white/20 hover:bg-black/5 dark:hover:bg-white/10"
-						>
-							Solicitar presupuesto
-						</Link>
+						{data?.primaryHref && data?.primaryText && (
+							<Link
+								href={data.primaryHref}
+								className="inline-flex items-center rounded-md px-5 py-2.5 text-sm bg-black text-white dark:bg-white/10 dark:text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-black/20 dark:focus:ring-white/30"
+							>
+								{data.primaryText}
+							</Link>
+						)}
+						{data?.secondaryHref && data?.secondaryText && (
+							<Link
+								href={data.secondaryHref}
+								className="inline-flex items-center rounded-md px-5 py-2.5 text-sm border border-black/15 dark:border-white/20 hover:bg-black/5 dark:hover:bg-white/10"
+							>
+								{data.secondaryText}
+							</Link>
+						)}
 					</motion.div>
 				</div>
 			</div>

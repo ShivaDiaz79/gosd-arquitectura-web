@@ -115,7 +115,6 @@ export default function UsersList({
 		<div
 			className={`rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 dark:bg-gray-900 ${className}`}
 		>
-			{/* Header */}
 			<div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<h2 className="text-base font-semibold text-slate-900">Usuarios</h2>
 				<div className="flex w-full items-center gap-2 sm:w-auto">

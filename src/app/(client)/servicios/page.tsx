@@ -30,7 +30,6 @@ const servicios = [
 export default function ServiciosIndex() {
 	return (
 		<main className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
-			{/* Hero */}
 			<section className="border-b border-black/10 dark:border-white/10">
 				<div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 py-20 md:py-28">
 					<motion.div
@@ -56,7 +55,6 @@ export default function ServiciosIndex() {
 				</div>
 			</section>
 
-			{/* Grid servicios */}
 			<section className="py-16 md:py-24">
 				<div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
 					<motion.div
@@ -88,7 +86,6 @@ export default function ServiciosIndex() {
 				</div>
 			</section>
 
-			{/* Diferenciales */}
 			<section className="py-16 md:py-24 border-t border-black/10 dark:border-white/10">
 				<div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
 					<motion.div
@@ -138,7 +135,6 @@ export default function ServiciosIndex() {
 				</div>
 			</section>
 
-			{/* Proceso resumido */}
 			<section className="py-16 md:py-24">
 				<div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
 					<motion.h2
@@ -180,7 +176,6 @@ export default function ServiciosIndex() {
 				</div>
 			</section>
 
-			{/* FAQs */}
 			<section className="py-16 md:py-24 border-t border-black/10 dark:border-white/10">
 				<div className="mx-auto max-w-[1000px] px-4 sm:px-6 lg:px-8">
 					<motion.h2
@@ -228,7 +223,6 @@ export default function ServiciosIndex() {
 				</div>
 			</section>
 
-			{/* CTA */}
 			<section className="py-20 md:py-28">
 				<div className="mx-auto max-w-[900px] px-4 sm:px-6 lg:px-8 text-center">
 					<motion.div
