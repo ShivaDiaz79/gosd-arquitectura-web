@@ -1,15 +1,10 @@
 "use client";
 
-import { JSX, useEffect, useMemo, useState } from "react";
+import { JSX } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ChevronDownIcon } from "@/icons";
 
-type ItemKey =
-	| "servicios"
-	| "categorias"
-	| "entregables"
-	| "ejecutables"
-	| "cotizador";
+type ItemKey = string;
 
 type AccordionItemProps = {
 	id: ItemKey;

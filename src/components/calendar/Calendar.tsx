@@ -170,7 +170,6 @@ const Calendar: React.FC = () => {
 				)}
 			</div>
 
-			{/* Modal de alta/edición */}
 			<Modal
 				isOpen={isOpen}
 				onClose={closeModal}
@@ -300,7 +299,6 @@ const Calendar: React.FC = () => {
 				</div>
 			</Modal>
 
-			{/* Modal de confirmación de eliminación */}
 			<ConfirmDeleteModal
 				isOpen={confirmOpen}
 				onClose={() => setConfirmOpen(false)}

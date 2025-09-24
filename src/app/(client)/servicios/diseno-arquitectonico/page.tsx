@@ -7,7 +7,6 @@ import Link from "next/link";
 export default function DisenoArquitectonico() {
 	return (
 		<main className="min-h-screen bg-white dark:bg-black text-black dark:text-white">
-			{/* Hero */}
 			<section className="border-b border-black/10 dark:border-white/10">
 				<div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 py-20 md:py-28">
 					<motion.div
@@ -33,7 +32,6 @@ export default function DisenoArquitectonico() {
 				</div>
 			</section>
 
-			{/* Beneficios */}
 			<section className="py-16 md:py-24">
 				<div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
 					<motion.h2
@@ -81,7 +79,6 @@ export default function DisenoArquitectonico() {
 				</div>
 			</section>
 
-			{/* Alcance */}
 			<section className="py-16 md:py-24 border-t border-black/10 dark:border-white/10">
 				<div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
 					<motion.h2
@@ -120,7 +117,6 @@ export default function DisenoArquitectonico() {
 				</div>
 			</section>
 
-			{/* Proceso específico */}
 			<section className="py-16 md:py-24">
 				<div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
 					<motion.h2
@@ -162,7 +158,6 @@ export default function DisenoArquitectonico() {
 				</div>
 			</section>
 
-			{/* CTA */}
 			<section className="py-20 md:py-28 border-t border-black/10 dark:border-white/10">
 				<div className="mx-auto max-w-[900px] px-4 sm:px-6 lg:px-8 text-center">
 					<motion.h3

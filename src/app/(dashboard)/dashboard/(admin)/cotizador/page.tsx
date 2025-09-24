@@ -9,12 +9,7 @@ import ServicioOpcionesForm from "@/components/cotizador/seleccion/ServicioOpcio
 import { useEffect, useState } from "react";
 import Accordion from "@/components/ui/accordion/Accordion";
 
-type Key =
-	| "servicios"
-	| "categorias"
-	| "entregables"
-	| "ejecutables"
-	| "cotizador";
+type Key = string;
 
 export default function CotizadorPage() {
 	const [openKey, setOpenKey] = useState<Key | null>("servicios");
