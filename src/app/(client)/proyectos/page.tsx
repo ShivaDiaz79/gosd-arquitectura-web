@@ -7,7 +7,7 @@ import ProjectStrip from "@/components/proyectos/ProjectStrip";
 
 export default function Page() {
 	const img1 =
-		"https://arquitecturaresidencial.com.ar/wp-content/uploads/2025/05/Casa-1-Hudson-10-1.jpg";
+		"https://content.arquitecturaydiseno.es/medio/2017/03/08/apartamentos12_c3121e4b.png";
 
 	return (
 		<>
