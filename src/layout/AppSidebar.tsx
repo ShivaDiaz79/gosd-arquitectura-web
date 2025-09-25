@@ -34,6 +34,14 @@ const navItems: NavItem[] = [
 	},
 	{
 		icon: <TableIcon />,
+		name: "Cotizador",
+		subItems: [
+			{ name: "Categorias", path: "/cotizador/categorias", pro: false },
+			{ name: "Planes", path: "/cotizador/plans", pro: false },
+		],
+	},
+	{
+		icon: <TableIcon />,
 		name: "Comercio Electronico",
 		subItems: [{ name: "Productos", path: "/products", pro: false }],
 	},

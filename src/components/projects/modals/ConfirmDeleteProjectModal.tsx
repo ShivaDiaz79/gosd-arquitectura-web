@@ -1,4 +1,3 @@
-// src/components/projects/modals/ConfirmDeleteProjectModal.tsx
 "use client";
 
 import { useState } from "react";

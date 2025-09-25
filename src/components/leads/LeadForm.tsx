@@ -1,4 +1,3 @@
-// components/leads/LeadForm.tsx
 "use client";
 
 import React, { useEffect, useMemo } from "react";
@@ -253,7 +252,6 @@ const LeadForm: React.FC<{
 		formState: { isSubmitting },
 	} = methods;
 
-	// Cuando cambian los defaultValues (p.ej., al abrir editar), sincroniza el form
 	useEffect(() => {
 		if (defaultValues) {
 			reset({
@@ -293,13 +291,10 @@ const LeadForm: React.FC<{
 		if (onSubmitLead) {
 			await onSubmitLead(values);
 		} else {
-			// fallback local
 			console.log("Lead enviado:", values);
 			alert("Lead registrado correctamente");
 		}
 
-		// Si este formulario se usa para crear dentro de modal,
-		// dejarlo limpio tras submit:
 		reset();
 	};
 

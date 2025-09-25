@@ -1,4 +1,3 @@
-// src/services/ProjectsService.ts
 import { db } from "@/firebase/config";
 import {
 	collection,
@@ -79,7 +78,6 @@ async function uploadImages(
 }
 
 export class ProjectsService {
-	// CREATE
 	static async create(data: {
 		title: string;
 		description: string;
@@ -102,7 +100,6 @@ export class ProjectsService {
 		return { id: base.id };
 	}
 
-	// READ (page listener)
 	static listenPage(opts: {
 		pageSize: number;
 		after?: QueryDocumentSnapshot<DocumentData>;
@@ -124,7 +121,6 @@ export class ProjectsService {
 		);
 	}
 
-	// READ (single)
 	static async getById(id: string): Promise<ProjectRow | null> {
 		const ref = doc(db, "projects", id);
 		const snap = await getDoc(ref);
@@ -140,14 +136,13 @@ export class ProjectsService {
 		};
 	}
 
-	// UPDATE (permite agregar y quitar imágenes)
 	static async update(
 		id: string,
 		data: {
 			title: string;
 			description: string;
 			addFiles?: File[];
-			removePaths?: string[]; // paths de Storage a borrar
+			removePaths?: string[];
 		}
 	) {
 		const refDoc = doc(db, "projects", id);
@@ -156,18 +151,16 @@ export class ProjectsService {
 		const curr = snap.data() as any;
 		let images: ProjectImage[] = Array.isArray(curr.images) ? curr.images : [];
 
-		// eliminar imágenes marcadas
 		if (data.removePaths?.length) {
 			const removeSet = new Set(data.removePaths);
 			const toDelete = images.filter((i) => removeSet.has(i.path));
-			// borrar de Storage
+
 			await Promise.allSettled(
 				toDelete.map((i) => deleteObject(storageRef(storage, i.path)))
 			);
 			images = images.filter((i) => !removeSet.has(i.path));
 		}
 
-		// subir nuevas
 		if (data.addFiles?.length) {
 			const newImgs = await uploadImages(id, data.addFiles);
 			images = [...images, ...newImgs];
@@ -181,7 +174,6 @@ export class ProjectsService {
 		});
 	}
 
-	// DELETE (borra doc + imágenes en Storage)
 	static async remove(id: string) {
 		const refDoc = doc(db, "projects", id);
 		const snap = await getDoc(refDoc);
