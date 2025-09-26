@@ -125,4 +125,10 @@ export class FeesService {
 	static async remove(id: string) {
 		await deleteDoc(doc(db, "fees", id));
 	}
+
+	static async listAll(): Promise<FeeRow[]> {
+		const col = collection(db, "fees");
+		const snap = await getDocs(query(col, orderBy("createdAt", "desc")));
+		return snap.docs.map((d) => mapDoc(d as any));
+	}
 }
