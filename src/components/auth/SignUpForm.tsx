@@ -37,7 +37,6 @@ export default function SignUpForm() {
 		}
 
 		try {
-			// Flujo normal: el usuario queda logueado
 			const fbUser = await authService.signUpSelf(
 				email,
 				password,
@@ -47,7 +46,6 @@ export default function SignUpForm() {
 			);
 			const simple = authService.toSimpleUser(fbUser);
 			await setFromFirebase(simple as any);
-			// TODO: redirige si quieres (router.push('/dashboard'))
 		} catch (err: any) {
 			setError(err?.message || "Error al crear la cuenta");
 		} finally {
@@ -62,7 +60,6 @@ export default function SignUpForm() {
 			const fbUser = await authService.signInWithGoogle("client");
 			const simple = authService.toSimpleUser(fbUser);
 			await setFromFirebase(simple as any);
-			// TODO: redirige
 		} catch (err: any) {
 			setError(err?.message || "No se pudo iniciar con Google");
 		} finally {
@@ -77,9 +74,7 @@ export default function SignUpForm() {
 			const fbUser = await authService.signInWithFacebook("client");
 			const simple = authService.toSimpleUser(fbUser);
 			await setFromFirebase(simple as any);
-			// TODO: redirige
 		} catch (err: any) {
-			// Si Facebook bloquea popups de 3ros, revisa configuración de OAuth
 			setError(err?.message || "No se pudo iniciar con Facebook");
 		} finally {
 			setLoading("none");
