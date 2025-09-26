@@ -188,6 +188,7 @@ export default function SignInForm() {
 							e.preventDefault();
 							setError("");
 							setLoadingEmail(true);
+
 							try {
 								await applyPersistence();
 								await signIn(email, password);

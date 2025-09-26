@@ -83,8 +83,13 @@ export const Modal: React.FC<ModalProps> = ({
 	};
 
 	const basePanel =
-		"relative w-full overflow-hidden rounded-3xl bg-white dark:bg-gray-900 shadow-2xl ring-1 ring-black/5 z-[999999]";
+		"relative w-full rounded-3xl bg-white dark:bg-gray-900 shadow-2xl ring-1 ring-black/5 z-[999999]";
 	const widthPanel = sizeToMaxWidth[size];
+
+	// contenedor scrollable interno (evita doble scroll)
+	const scrollAreaClass = isFullscreen
+		? "h-full overflow-y-auto overscroll-contain p-6 sm:p-8"
+		: "max-h-[85vh] overflow-y-auto overscroll-contain p-6 sm:p-8";
 
 	return (
 		<AnimatePresence>
@@ -99,7 +104,7 @@ export const Modal: React.FC<ModalProps> = ({
 							<motion.button
 								type="button"
 								aria-label="Cerrar modal (overlay)"
-								className="fixed inset-0 z-[999999] h-full w-full bg-black/40 backdrop-blur-sm"
+								className="fixed inset-0 z-[999998] h-full w-full bg-black/40 backdrop-blur-sm"
 								initial="hidden"
 								animate="visible"
 								exit="exit"
@@ -115,8 +120,8 @@ export const Modal: React.FC<ModalProps> = ({
 							ref={modalRef}
 							className={[
 								isFullscreen
-									? "fixed inset-0 z-[999999] w-screen h-screen overflow-auto bg-white dark:bg-gray-900"
-									: `${basePanel} ${widthPanel} w-[92vw] max-h-[85vh] overflow-auto`,
+									? "fixed inset-0 z-[999999] w-screen h-screen bg-white dark:bg-gray-900"
+									: `${basePanel} ${widthPanel} w-[92vw]`,
 								className || "",
 							].join(" ")}
 							onClick={(e) => e.stopPropagation()}
@@ -129,7 +134,7 @@ export const Modal: React.FC<ModalProps> = ({
 							{showX && (
 								<button
 									onClick={onClose}
-									className="absolute right-3 top-3 z-[999999]-10 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white sm:right-5 sm:top-5"
+									className="absolute right-3 top-3 w-10 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white sm:right-5 sm:top-5"
 									aria-label="Cerrar"
 								>
 									<svg
@@ -149,7 +154,7 @@ export const Modal: React.FC<ModalProps> = ({
 								</button>
 							)}
 
-							<div className={isFullscreen ? "" : "p-6 sm:p-8"}>{children}</div>
+							<div className={scrollAreaClass}>{children}</div>
 						</motion.div>
 					</div>
 				</ModalPortal>
